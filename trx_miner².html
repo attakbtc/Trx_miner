@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRX Cloud Mining - App para Telegram</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --primary: #1a237e;
+            --secondary: #00bcd4;
+            --accent: #ff4081;
+            --dark: #121212;
+            --light: #f5f5f5;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --telegram-blue: #0088cc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 15px;
+        }
+        
+        .telegram-header {
+            background: linear-gradient(135deg, var(--telegram-blue), #00bcd4);
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .telegram-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(to bottom, rgba(0,136,204,0.3), transparent);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 0.5rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+        
+        .user-details {
+            text-align: left;
+        }
+        
+        .user-name {
+            font-weight: bold;
+        }
+        
+        .user-username {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .btn-primary {
+            background-color: var(--telegram-blue);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--light);
+            color: var(--light);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .mining-section {
+            padding: 1.5rem 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .progress-container {
+            margin: 1.5rem 0;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--telegram-blue);
+            transition: width 0.3s;
+        }
+        
+        .mining-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        
+        .plans-section {
+            padding: 1.5rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+        
+        .plans-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .plan-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .plan-card.popular {
+            border: 2px solid var(--telegram-blue);
+        }
+        
+        .plan-card.popular::before {
+            content: "POPULAR";
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background-color: var(--telegram-blue);
+            color: white;
+            padding: 5px 30px;
+            transform: rotate(45deg);
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .plan-name {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-price {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        .plan-features li {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .alert-warning {
+            background-color: rgba(255, 152, 0, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+        
+        .alert-info {
+            background-color: rgba(0, 136, 204, 0.2);
+            border: 1px solid var(--telegram-blue);
+            color: var(--telegram-blue);
+        }
+        
+        .referral-section {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .referral-code {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        
+        .telegram-features {
+            display: flex;
+            justify-content: space-around;
+            margin: 1.5rem 0;
+        }
+        
+        .telegram-feature {
+            text-align: center;
+            flex: 1;
+            padding: 0 10px;
+        }
+        
+        .telegram-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--telegram-blue);
+        }
+        
+        .withdrawal-section {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 1rem;
+        }
+        
+        .tab-navigation {
+            display: flex;
+            justify-content: space-around;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .tab-button {
+            background: none;
+            border: none;
+            color: var(--light);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .tab-button.active {
+            background-color: var(--telegram-blue);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+        
+        .history-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .history-amount {
+            color: var(--success);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Encabezado con información del usuario de Telegram -->
+    <div class="telegram-header">
+        <div class="logo">
+            <span class="logo-icon">⚡</span>
+            <span>TRX Cloud Mining</span>
+        </div>
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div class="user-details">
+                <div class="user-name" id="userName">Usuario</div>
+                <div class="user-username" id="userUsername">@usuario</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Navegación por pestañas -->
+        <div class="tab-navigation">
+            <button class="tab-button active" data-tab="mining">Minería</button>
+            <button class="tab-button" data-tab="plans">Planes</button>
+            <button class="tab-button" data-tab="withdraw">Retirar</button>
+            <button class="tab-button" data-tab="history">Historial</button>
+        </div>
+
+        <!-- Pestaña de Minería -->
+        <div class="tab-content active" id="mining-tab">
+            <div class="mining-section">
+                <div class="alert alert-info" id="miningStatusAlert">
+                    Plan gratuito activo. Tiempo restante: <span id="remainingTime">08:00:00</span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">TRX Minados</div>
+                        <div class="stat-value" id="minedTRX">0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Potencia</div>
+                        <div class="stat-value" id="miningPower">0 H/s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tiempo Activo</div>
+                        <div class="stat-value" id="miningTime">00:00:00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ganancias Diarias</div>
+                        <div class="stat-value" id="dailyEarnings">0.00 TRX</div>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progreso de Minería (8h límite)</span>
+                        <span id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="miningProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="mining-controls">
+                    <button class="btn btn-primary" id="startMiningBtn">Iniciar Minería</button>
+                    <button class="btn btn-outline" id="stopMiningBtn">Detener Minería</button>
+                    <button class="btn btn-success" id="activatePlanBtn">Activar Plan Gratuito</button>
+                </div>
+            </div>
+
+            <!-- Sección de Referidos -->
+            <div class="referral-section">
+                <h3>Invita a Amigos</h3>
+                <p>Comparte tu código y gana el 10% de las ganancias de tus referidos</p>
+                <div class="referral-code" id="referralCode">TRX-XXXX-XXXX</div>
+                <button class="btn btn-outline" id="shareBtn">Compartir en Telegram</button>
+            </div>
+
+            <!-- Características de Telegram -->
+            <div class="telegram-features">
+                <div class="telegram-feature">
+                    <div class="telegram-icon">🔔</div>
+                    <div>Notificaciones</div>
+                </div>
+                <div class="telegram-feature">
+                    <div class="telegram-icon">📊</div>
+                    <div>Estadísticas</div>
+                </div>
+                <div class="telegram-feature">
+                    <div class="telegram-icon">👥</div>
+                    <div>Referidos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña de Planes -->
+        <div class="tab-content" id="plans-tab">
+            <div class="plans-section">
+                <h2 class="section-title">Planes de Minería</h2>
+                <div class="plans-grid">
+                    <div class="plan-card">
+                        <h3 class="plan-name">Gratuito</h3>
+                        <div class="plan-price">0 TRX</div>
+                        <ul class="plan-features">
+                            <li>Potencia: 100 H/s</li>
+                            <li>Límite: 8 horas de minería</li>
+                            <li>Ganancia diaria: ~0.5 TRX</li>
+                            <li>Reactivación manual necesaria</li>
+                            <li>Soporte estándar</li>
+                        </ul>
+                        <button class="btn btn-outline" id="selectFreePlan">Seleccionar</button>
+                    </div>
+                    <div class="plan-card popular">
+                        <h3 class="plan-name">Avanzado</h3>
+                        <div class="plan-price">50 TRX/mes</div>
+                        <ul class="plan-features">
+                            <li>Potencia: 600 H/s</li>
+                            <li>Sin límites de tiempo</li>
+                            <li>Ganancia diaria: ~3 TRX</li>
+                            <li>Soporte prioritario</li>
+                            <li>Notificaciones en Telegram</li>
+                            <li>Retiros diarios</li>
+                        </ul>
+                        <button class="btn btn-primary">Seleccionar</button>
+                    </div>
+                    <div class="plan-card">
+                        <h3 class="plan-name">Profesional</h3>
+                        <div class="plan-price">100 TRX/mes</div>
+                        <ul class="plan-features">
+                            <li>Potencia: 1500 H/s</li>
+                            <li>Sin límites de tiempo</li>
+                            <li>Ganancia diaria: ~8 TRX</li>
+                            <li>Soporte 24/7</li>
+                            <li>Notificaciones en Telegram</li>
+                            <li>Retiros instantáneos</li>
+                            <li>Estadísticas avanzadas</li>
+                        </ul>
+                        <button class="btn btn-outline">Seleccionar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña de Retiro -->
+        <div class="tab-content" id="withdraw-tab">
+            <div class="withdrawal-section">
+                <h2 class="section-title">Retirar TRX</h2>
+                <div class="alert alert-info">
+                    Saldo disponible: <span id="withdrawBalance">0.00</span> TRX
+                </div>
+                
+                <form id="withdrawForm">
+                    <div class="form-group">
+                        <label for="walletAddress">Dirección de Wallet TRX</label>
+                        <input type="text" id="walletAddress" placeholder="TJ... o T...">
+                    </div>
+                    <div class="form-group">
+                        <label for="withdrawAmount">Cantidad a retirar (TRX)</label>
+                        <input type="number" id="withdrawAmount" min="1" step="0.1" placeholder="0.00">
+                    </div>
+                    <button type="submit" class="btn btn-success" id="withdrawBtn">Solicitar Retiro</button>
+                </form>
+                
+                <div class="alert alert-warning" style="margin-top: 1rem;">
+                    <strong>Nota:</strong> Los retiros se procesan una vez al día para el plan gratuito. Los planes de pago tienen retiros instantáneos.
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña de Historial -->
+        <div class="tab-content" id="history-tab">
+            <div class="section-title">Historial de Actividad</div>
+            <div id="historyList">
+                <!-- Los elementos de historial se generarán dinámicamente -->
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>TRX Cloud Mining - App para Telegram<br>Esta es una aplicación de simulación</p>
+        </div>
+    </div>
+
+    <script>
+        // Clase Usuario para gestionar datos individuales
+        class Usuario {
+            constructor(telegramId, username, firstName, lastName) {
+                this.id = telegramId;
+                this.username = username || '';
+                this.firstName = firstName || '';
+                this.lastName = lastName || '';
+                this.minedTRX = 0;
+                this.miningPower = 0;
+                this.miningTime = 0;
+                this.plan = 'free'; // 'free', 'advanced', 'professional'
+                this.planActive = false;
+                this.remainingMiningTime = 8 * 60 * 60; // 8 horas en segundos
+                this.isMining = false;
+                this.lastMiningStart = null;
+                this.referralCode = 'TRX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                this.referredBy = null;
+                this.referrals = [];
+                this.withdrawalHistory = [];
+                this.createdAt = new Date().toISOString();
+            }
+            
+            getDisplayName() {
+                if (this.firstName && this.lastName) {
+                    return `${this.firstName} ${this.lastName}`;
+                }
+                return this.firstName || this.username || 'Usuario';
+            }
+            
+            getAvatarInitial() {
+                return (this.firstName ? this.firstName.charAt(0) : (this.username ? this.username.charAt(0) : 'U')).toUpperCase();
+            }
+            
+            // Calcular ganancias diarias estimadas
+            getDailyEarnings() {
+                return (this.miningPower * 0.005).toFixed(2); // 0.005 TRX por H/s por día
+            }
+            
+            // Verificar si puede minar (tiempo restante)
+            canMine() {
+                return this.planActive && this.remainingMiningTime > 0;
+            }
+            
+            // Activar plan gratuito
+            activateFreePlan() {
+                this.plan = 'free';
+                this.planActive = true;
+                this.miningPower = 100;
+                this.remainingMiningTime = 8 * 60 * 60; // 8 horas
+                return true;
+            }
+            
+            // Formatear tiempo restante
+            getFormattedRemainingTime() {
+                const hours = Math.floor(this.remainingMiningTime / 3600);
+                const minutes = Math.floor((this.remainingMiningTime % 3600) / 60);
+                const seconds = this.remainingMiningTime % 60;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Calcular porcentaje de progreso
+            getMiningProgress() {
+                const totalTime = 8 * 60 * 60; // 8 horas en segundos
+                return ((totalTime - this.remainingMiningTime) / totalTime) * 100;
+            }
+            
+            // Añadir retiro al historial
+            addWithdrawal(amount, address) {
+                this.withdrawalHistory.unshift({
+                    amount: amount,
+                    address: address,
+                    date: new Date().toISOString(),
+                    status: 'pending'
+                });
+            }
+        }
+
+        // Elementos del DOM
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userUsername = document.getElementById('userUsername');
+        const startMiningBtn = document.getElementById('startMiningBtn');
+        const stopMiningBtn = document.getElementById('stopMiningBtn');
+        const activatePlanBtn = document.getElementById('activatePlanBtn');
+        const minedTRXElement = document.getElementById('minedTRX');
+        const miningPowerElement = document.getElementById('miningPower');
+        const miningTimeElement = document.getElementById('miningTime');
+        const dailyEarningsElement = document.getElementById('dailyEarnings');
+        const remainingTimeElement = document.getElementById('remainingTime');
+        const miningProgressElement = document.getElementById('miningProgress');
+        const progressPercentageElement = document.getElementById('progressPercentage');
+        const referralCodeElement = document.getElementById('referralCode');
+        const shareBtn = document.getElementById('shareBtn');
+        const selectFreePlanBtn = document.getElementById('selectFreePlan');
+        const withdrawBalanceElement = document.getElementById('withdrawBalance');
+        const withdrawForm = document.getElementById('withdrawForm');
+        const walletAddressInput = document.getElementById('walletAddress');
+        const withdrawAmountInput = document.getElementById('withdrawAmount');
+        const historyList = document.getElementById('historyList');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const miningStatusAlert = document.getElementById('miningStatusAlert');
+
+        // Variables de estado
+        let currentUser = null;
+        let miningInterval = null;
+        let users = JSON.parse(localStorage.getItem('trx_mining_telegram_users')) || {};
+
+        // Inicializar la aplicación de Telegram
+        function initTelegramApp() {
+            // Expandir la aplicación para ocupar toda la pantalla
+            Telegram.WebApp.expand();
+            
+            // Obtener datos del usuario de Telegram
+            const tgUser = Telegram.WebApp.initDataUnsafe.user;
+            
+            if (tgUser) {
+                // Buscar o crear usuario
+                if (users[tgUser.id]) {
+                    currentUser = Object.assign(new Usuario(), users[tgUser.id]);
+                } else {
+                    currentUser = new Usuario(
+                        tgUser.id,
+                        tgUser.username,
+                        tgUser.first_name,
+                        tgUser.last_name
+                    );
+                    users[tgUser.id] = currentUser;
+                    saveUsers();
+                }
+                
+                // Actualizar UI con datos del usuario
+                updateUserUI();
+                
+                // Si estaba minando, restaurar el estado de minería
+                if (currentUser.isMining && currentUser.lastMiningStart) {
+                    const timeDiff = Math.floor((Date.now() - new Date(currentUser.lastMiningStart).getTime()) / 1000);
+                    if (timeDiff > 0 && currentUser.remainingMiningTime > 0) {
+                        const miningTimeToAdd = Math.min(timeDiff, currentUser.remainingMiningTime);
+                        currentUser.miningTime += miningTimeToAdd;
+                        currentUser.remainingMiningTime -= miningTimeToAdd;
+                        currentUser.minedTRX += (currentUser.miningPower * 0.000001) * miningTimeToAdd;
+                        
+                        // Guardar cambios
+                        saveUsers();
+                    }
+                    
+                    // Reiniciar minería si aún hay tiempo
+                    if (currentUser.remainingMiningTime > 0) {
+                        startMining();
+                    } else {
+                        currentUser.isMining = false;
+                        saveUsers();
+                    }
+                }
+                
+                updateUI();
+            } else {
+                // Si no hay usuario de Telegram, mostrar error
+                document.body.innerHTML = `
+                    <div style="padding: 20px; text-align: center;">
+                        <h2>Error</h2>
+                        <p>Esta aplicación debe abrirse desde Telegram.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Actualizar UI con datos del usuario
+        function updateUserUI() {
+            userAvatar.textContent = currentUser.getAvatarInitial();
+            userName.textContent = currentUser.getDisplayName();
+            userUsername.textContent = currentUser.username ? `@${currentUser.username}` : '';
+            referralCodeElement.textContent = currentUser.referralCode;
+        }
+        
+        // Actualizar interfaz de usuario según el estado
+        function updateUI() {
+            if (!currentUser) return;
+            
+            // Actualizar datos del dashboard
+            minedTRXElement.textContent = currentUser.minedTRX.toFixed(2);
+            miningPowerElement.textContent = currentUser.miningPower + ' H/s';
+            
+            // Formatear tiempo de minería
+            const hours = Math.floor(currentUser.miningTime / 3600);
+            const minutes = Math.floor((currentUser.miningTime % 3600) / 60);
+            const seconds = currentUser.miningTime % 60;
+            miningTimeElement.textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Actualizar ganancias diarias
+            dailyEarningsElement.textContent = currentUser.getDailyEarnings() + ' TRX';
+            
+            // Actualizar tiempo restante y progreso
+            if (currentUser.planActive) {
+                remainingTimeElement.textContent = currentUser.getFormattedRemainingTime();
+                const progress = currentUser.getMiningProgress();
+                miningProgressElement.style.width = `${progress}%`;
+                progressPercentageElement.textContent = `${progress.toFixed(1)}%`;
+                
+                miningStatusAlert.style.display = 'block';
+                
+                if (currentUser.canMine()) {
+                    miningStatusAlert.className = 'alert alert-info';
+                    miningStatusAlert.innerHTML = `Plan gratuito activo. Tiempo restante: <span id="remainingTime">${currentUser.getFormattedRemainingTime()}</span>`;
+                } else {
+                    miningStatusAlert.className = 'alert alert-warning';
+                    miningStatusAlert.innerHTML = '<strong>Plan agotado:</strong> Has usado tus 8 horas de minería gratuita. Activa el plan nuevamente para continuar.';
+                }
+            } else {
+                miningStatusAlert.style.display = 'none';
+            }
+            
+            // Configurar botones de minería
+            if (currentUser.isMining) {
+                startMiningBtn.disabled = true;
+                stopMiningBtn.disabled = false;
+            } else {
+                startMiningBtn.disabled = !currentUser.canMine();
+                stopMiningBtn.disabled = true;
+            }
+            
+            // Mostrar/ocultar botón de activación
+            activatePlanBtn.style.display = currentUser.planActive ? 'none' : 'block';
+            
+            // Actualizar saldo para retiro
+            withdrawBalanceElement.textContent = currentUser.minedTRX.toFixed(2);
+            
+            // Actualizar historial
+            updateHistory();
+        }
+        
+        // Iniciar minería
+        function startMining() {
+            if (!currentUser || !currentUser.canMine()) return;
+            
+            currentUser.isMining = true;
+            currentUser.lastMiningStart = new Date().toISOString();
+            saveUsers();
+            
+            miningInterval = setInterval(() => {
+                if (currentUser.remainingMiningTime <= 0) {
+                    stopMining();
+                    showNotification('¡Has agotado tus 8 horas de minería gratuita! Activa el plan nuevamente para continuar.');
+                    return;
+                }
+                
+                // Actualizar estadísticas
+                currentUser.miningTime++;
+                currentUser.remainingMiningTime--;
+                currentUser.minedTRX += (currentUser.miningPower * 0.000001); // 0.000001 TRX por H/s por segundo
+                
+                // Actualizar UI
+                updateUI();
+                
+                // Guardar cada 10 segundos para no sobrecargar localStorage
+                if (currentUser.miningTime % 10 === 0) {
+                    saveUsers();
+                }
+            }, 1000);
+            
+            updateUI();
+        }
+        
+        // Detener minería
+        function stopMining() {
+            if (miningInterval) {
+                clearInterval(miningInterval);
+                miningInterval = null;
+            }
+            
+            if (currentUser) {
+                currentUser.isMining = false;
+                saveUsers();
+            }
+            
+            updateUI();
+        }
+        
+        // Activar plan gratuito
+        function activateFreePlan() {
+            if (!currentUser) return;
+            
+            currentUser.activateFreePlan();
+            saveUsers();
+            updateUI();
+            
+            showNotification('¡Plan gratuito activado! Ahora tienes 8 horas de minería disponible.');
+        }
+        
+        // Mostrar notificación
+        function showNotification(message) {
+            // En una app real de Telegram, usaríamos Telegram.WebApp.showAlert o showPopup
+            alert(message);
+        }
+        
+        // Compartir en Telegram
+        function shareOnTelegram() {
+            const shareText = `¡Únete a TRX Cloud Mining y comienza a minar TRX gratis! Usa mi código de referencia: ${currentUser.referralCode}`;
+            
+            // En una app real, usaríamos Telegram.WebApp.shareUrl o crearíamos un enlace de invitación
+            const shareUrl = `https://t.me/share/url?url=https://t.me/YourBot&text=${encodeURIComponent(shareText)}`;
+            
+            // Abrir en una nueva ventana o usar el método de Telegram si está disponible
+            window.open(shareUrl, '_blank');
+        }
+        
+        // Procesar retiro
+        function processWithdrawal(amount, address) {
+            if (!currentUser || currentUser.minedTRX < amount) {
+                showNotification('No tienes suficiente TRX para realizar este retiro.');
+                return false;
+            }
+            
+            if (amount < 1) {
+                showNotification('El monto mínimo de retiro es 1 TRX.');
+                return false;
+            }
+            
+            currentUser.minedTRX -= amount;
+            currentUser.addWithdrawal(amount, address);
+            saveUsers();
+            updateUI();
+            
+            showNotification(`¡Retiro solicitado! ${amount} TRX serán enviados a ${address}. Los retiros se procesan una vez al día.`);
+            return true;
+        }
+        
+        // Actualizar historial
+        function updateHistory() {
+            if (!currentUser) return;
+            
+            historyList.innerHTML = '';
+            
+            if (currentUser.withdrawalHistory.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; opacity: 0.7;">No hay historial de retiros</p>';
+                return;
+            }
+            
+            currentUser.withdrawalHistory.forEach(withdrawal => {
+                const date = new Date(withdrawal.date).toLocaleDateString();
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div>
+                        <div>Retiro a: ${withdrawal.address.substring(0, 10)}...</div>
+                        <div style="font-size: 0.8rem; opacity: 0.7;">${date}</div>
+                    </div>
+                    <div class="history-amount">-${withdrawal.amount} TRX</div>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+        
+        // Cambiar pestañas
+        function switchTab(tabName) {
+            // Actualizar botones de pestañas
+            tabButtons.forEach(button => {
+                if (button.dataset.tab === tabName) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // Actualizar contenido de pestañas
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+        
+        // Guardar usuarios en localStorage
+        function saveUsers() {
+            localStorage.setItem('trx_mining_telegram_users', JSON.stringify(users));
+        }
+        
+        // Event Listeners
+        startMiningBtn.addEventListener('click', startMining);
+        stopMiningBtn.addEventListener('click', stopMining);
+        activatePlanBtn.addEventListener('click', activateFreePlan);
+        shareBtn.addEventListener('click', shareOnTelegram);
+        selectFreePlanBtn.addEventListener('click', activateFreePlan);
+        
+        withdrawForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = parseFloat(withdrawAmountInput.value);
+            const address = walletAddressInput.value.trim();
+            
+            if (!address) {
+                showNotification('Por favor, ingresa una dirección de wallet válida.');
+                return;
+            }
+            
+            if (processWithdrawal(amount, address)) {
+                withdrawForm.reset();
+            }
+        });
+        
+        // Event listeners para pestañas
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                switchTab(button.dataset.tab);
+            });
+        });
+        
+        // Inicializar la aplicación cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', initTelegramApp);
+    </script>
+</body>
+</html>
